@@ -16,8 +16,8 @@
  async function runScraperAndInsert(category='all',search='',limit=20)
  {
 
-    const run = await client.actor('matyascimbulka/pcpartìcker-scraper').call({
-    searchPrhases: [search],
+    const run = await client.actor('matyascimbulka/pcpartpicker-scraper').call({
+    searchPhrases: [search],
     category,
     maxProducts:limit,
     maxReviews:0,       
@@ -26,7 +26,7 @@
 
     for await(const item of client.dataset(run.defaultDatasetId).iterateItems())
     {
-        const {name,price,band,category}=item;
+        const {name,price,brand,category}=item;
         const specs={
             rating: item.rating,
             reviews: item.reviews,
@@ -34,10 +34,10 @@
         };
        
         await pool.query(
-            `INSERT INTO parts (name, price, band, category, specs)
+            `INSERT INTO components (name, price, brand, category, specs)
              VALUES ($1, $2, $3, $4, $5)
              ON CONFLICT  DO NOTHING`,
-            [name, price, band, category, specs]
+             [category || 'unknown', name, brand, price || 0, specs]
         );
 
      }
