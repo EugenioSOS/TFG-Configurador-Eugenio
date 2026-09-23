@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+  
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model almacenamiento {
+  id           BigInt      @id
+  tipo         String?
+  capacidad_gb Int
+  formato      String?
+  interfaz     String?
+  componentes  componentes @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model build_componentes {
+  id                 BigInt      @id @default(autoincrement())
+  build_id           BigInt
+  componente_id      BigInt
+  precio_en_creacion Decimal?    @db.Decimal(10, 2)
+  builds             builds      @relation(fields: [build_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  componentes        componentes @relation(fields: [componente_id], references: [id], onUpdate: NoAction)
+
+  @@unique([build_id, componente_id])
+  @@index([build_id], map: "idx_buildcomp_build")
+}
+
+model builds {
+  id                   BigInt              @id @default(autoincrement())
+  usuario_id           BigInt?
+  nombre               String?
+  uso                  uso_build?
+  presupuesto_objetivo Decimal?            @db.Decimal(10, 2)
+  modo                 modo_config?
+  creado_en            DateTime            @default(now()) @db.Timestamptz(6)
+  build_componentes    build_componentes[]
+  usuarios             usuarios?           @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([usuario_id], map: "idx_builds_usuario")
+}
+
+model cajas {
+  id                  BigInt      @id
+  formatos_admitidos  String[]
+  altura_max_disip_mm Int?
+  long_max_gpu_mm     Int?
+  componentes         componentes @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model componentes {
+  id                BigInt              @id @default(autoincrement())
+  tipo              tipo_componente
+  nombre            String
+  marca             String?
+  modelo            String?
+  imagen_url        String?
+  creado_en         DateTime            @default(now()) @db.Timestamptz(6)
+  actualizado_en    DateTime            @default(now()) @db.Timestamptz(6)
+  almacenamiento    almacenamiento?
+  build_componentes build_componentes[]
+  cajas             cajas?
+  cpus              cpus?
+  fuentes           fuentes?
+  gpus              gpus?
+  ofertas           ofertas[]
+  placas            placas?
+  precios_historico precios_historico[]
+  ram               ram?
+  refrigeracion     refrigeracion?
+
+  @@index([tipo], map: "idx_componentes_tipo")
+}
+
+model cpus {
+  id                BigInt      @id
+  socket            String
+  tipo_ram          String?
+  tdp_watts         Int?
+  nucleos           Int?
+  hilos             Int?
+  frecuencia_ghz    Decimal?    @db.Decimal(4, 2)
+  grafica_integrada Boolean?    @default(false)
+  componentes       componentes @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model fuentes {
+  id            BigInt      @id
+  watts         Int
+  certificacion String?
+  modular       String?
+  componentes   componentes @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model gpus {
+  id                 BigInt      @id
+  tdp_watts          Int?
+  longitud_mm        Int?
+  vram_gb            Int?
+  watts_recomendados Int?
+  componentes        componentes @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model ofertas {
+  id             BigInt      @id @default(autoincrement())
+  componente_id  BigInt
+  tienda_id      Int
+  precio         Decimal?    @db.Decimal(10, 2)
+  url            String
+  disponible     Boolean?    @default(true)
+  actualizado_en DateTime    @default(now()) @db.Timestamptz(6)
+  componentes    componentes @relation(fields: [componente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tiendas        tiendas     @relation(fields: [tienda_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([componente_id, tienda_id])
+  @@index([componente_id], map: "idx_ofertas_componente")
+}
+
+model placas {
+  id          BigInt      @id
+  socket      String
+  tipo_ram    String
+  formato     String
+  slots_ram   Int?
+  ram_max_gb  Int?
+  chipset     String?
+  componentes componentes @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model precios_historico {
+  id            BigInt      @id @default(autoincrement())
+  componente_id BigInt
+  tienda_id     Int
+  precio        Decimal     @db.Decimal(10, 2)
+  registrado_en DateTime    @default(now()) @db.Timestamptz(6)
+  componentes   componentes @relation(fields: [componente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tiendas       tiendas     @relation(fields: [tienda_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([componente_id, registrado_en], map: "idx_historico_comp_fecha")
+}
+
+model ram {
+  id             BigInt      @id
+  tipo           String
+  capacidad_gb   Int
+  modulos        Int?
+  frecuencia_mhz Int?
+  componentes    componentes @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model refrigeracion {
+  id            BigInt      @id
+  clase         String?
+  altura_mm     Int?
+  tdp_max_watts Int?
+  socket_compat String[]
+  componentes   componentes @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model tiendas {
+  id                Int                 @id @default(autoincrement())
+  nombre            String              @unique
+  web_url           String?
+  logo_url          String?
+  ofertas           ofertas[]
+  precios_historico precios_historico[]
+}
+
+model usuarios {
+  id            BigInt   @id @default(autoincrement())
+  email         String   @unique
+  username      String   @unique
+  password_hash String
+  creado_en     DateTime @default(now()) @db.Timestamptz(6)
+  builds        builds[]
+}
+
+enum modo_config {
+  simple
+  detallado
+}
+
+enum tipo_componente {
+  cpu
+  gpu
+  placa
+  ram
+  almacenamiento
+  fuente
+  refrigeracion
+  caja
+}
+
+enum uso_build {
+  juegos
+  diseno
+  ofimatica
+}
