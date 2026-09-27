@@ -19,20 +19,67 @@ function socketDesdeNombre(nombre) {
   return s.toUpperCase();
 }
 
+// Frecuencia desde el nombre: "5.2GHz", "3.4 GHz", "6,0GHz"...
+function frecuenciaDesdeNombre(nombre) {
+  if (!nombre) return null;
+  const m = nombre.match(/(\d+(?:[.,]\d+)?)\s?GHz/i);
+  return m ? parseFloat(m[1].replace(',', '.')) : null;
+}
+
+// Quita acentos/mayusculas para comparar claves de forma robusta.
+function norm(s) { return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+
+// Busca en specs la primera clave que contenga TODAS las palabras dadas (sin acentos).
+function buscarSpec(specs, ...palabras) {
+  for (const clave of Object.keys(specs)) {
+    const kn = norm(clave);
+    if (palabras.every((w) => kn.includes(norm(w)))) return specs[clave];
+  }
+  return null;
+}
+
+// Tipo de RAM (DDR4/DDR5) a partir de un texto.
+function tipoRamDesde(txt) {
+  if (!txt) return null;
+  const m = txt.match(/DDR\d/i);
+  return m ? m[0].toUpperCase() : null;
+}
+
+// Cierra el banner de cookies (Cookiebot) si aparece: bloquea clics y ensucia el DOM.
+async function aceptarCookies(page) {
+  const sel = '#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll, #CybotCookiebotDialogBodyButtonAccept';
+  try {
+    const btn = page.locator(sel).first();
+    if (await btn.count() > 0) { await btn.click({ timeout: 2000 }).catch(() => {}); }
+  } catch (e) { /* si no hay banner, nada */ }
+}
+
 async function extraerSpecs(page, url) {
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
- 
-  try {
-    await page.waitForSelector('.collapse-content li, .collapse-title', { timeout: 8000 });
-  } catch (e) { return {}; }
+  await aceptarCookies(page);
 
-  return page.$$eval('.collapse-content li', (lis) => {
+  // Esperar a que aparezca alguna spec conocida (hasta 6s); si no, seguimos con lo que haya.
+  try {
+    await page.waitForFunction(() =>
+      Array.from(document.querySelectorAll('li strong'))
+        .some((s) => /Socket|Cantidad de n|Consumo de energ/i.test(s.textContent || '')),
+      { timeout: 6000 });
+  } catch (e) { /* puede no cargar; devolvemos lo que haya */ }
+
+  // Leer los pares <li><strong>Clave</strong>: valor</li>, EXCLUYENDO la basura de cookies.
+  // (el banner de cookies mete li con "Duración máxima de almacenamiento", "Tipo: Cookie"...)
+  return page.$$eval('li', (lis) => {
     const out = {};
     for (const li of lis) {
       const strong = li.querySelector('strong');
       if (!strong) continue;
+      const txt = li.textContent || '';
+      // Descarta el ruido del banner de cookies (valores larguisimos o con estas marcas).
+      if (/Duraci..n m..xima|Tipo: Cookie|Almacenamiento Local|proveedor|IndexedDB/i.test(txt)) continue;
+      if (txt.length > 300) continue;
+
       const clave = strong.textContent.replace(':', '').trim();
-      const valor = li.textContent.replace(strong.textContent, '').replace(/^:\s*/, '').trim();
+      let valor = txt.replace(strong.textContent, '').replace(/^[:\s]+/, '').trim();
       if (clave && valor) out[clave] = valor;
     }
     return out;
@@ -40,12 +87,13 @@ async function extraerSpecs(page, url) {
 }
 
 function mapearCpu(specs, nombre) {
-  const socket = specs['Socket'] || socketDesdeNombre(nombre);
-  const tdp = numInt(specs['Consumo de energía (TDP)']);
-  const nucleos = numInt(specs['Cantidad de núcleos']);
-  const hilos = numInt(specs['Cantidad de hilos']);
-  const frecuencia = numFloat(specs['Frecuencia máxima']);
-  const descModelo = (specs['Descripción del modelo'] || nombre || '').toLowerCase();
+  const socket = buscarSpec(specs, 'socket') || socketDesdeNombre(nombre);
+  const tdp = numInt(buscarSpec(specs, 'consumo', 'tdp') || buscarSpec(specs, 'tdp'));
+  const nucleos = numInt(buscarSpec(specs, 'cantidad', 'nucleos'));
+  const hilos = numInt(buscarSpec(specs, 'cantidad', 'hilos'));
+  const frecuencia = numFloat(buscarSpec(specs, 'frecuencia', 'maxima')) || frecuenciaDesdeNombre(nombre);
+  const tipoRam = tipoRamDesde(buscarSpec(specs, 'memoria', 'compatible') || buscarSpec(specs, 'soporte', 'memoria'));
+  const descModelo = (buscarSpec(specs, 'descripcion', 'modelo') || nombre || '').toLowerCase();
   const graficaIntegrada = /integrad|radeon|graphics|uhd|vega/.test(descModelo);
 
   const data = {};
@@ -54,11 +102,11 @@ function mapearCpu(specs, nombre) {
   if (nucleos != null) data.nucleos = nucleos;
   if (hilos != null) data.hilos = hilos;
   if (frecuencia != null) data.frecuencia_ghz = frecuencia;
+  if (tipoRam) data.tipo_ram = tipoRam;
   data.grafica_integrada = graficaIntegrada;
   return { data, socket };
 }
 
-// Procesa un lote de CPUs con UNA pagina (un "worker").
 async function worker(context, cola, contador) {
   const page = await context.newPage();
   while (cola.length > 0) {
@@ -68,13 +116,13 @@ async function worker(context, cola, contador) {
     let specs = {};
     if (url) {
       try { specs = await extraerSpecs(page, url); }
-      catch (e) { /* seguimos con lo que haya (socket del nombre) */ }
+      catch (e) { /* seguimos con lo que haya (socket/frecuencia del nombre) */ }
     }
     const { data, socket } = mapearCpu(specs, cpu.nombre);
     try {
       await prisma.cpus.update({ where: { id: cpu.id }, data });
       contador.ok++;
-      console.log(`   OK [${contador.ok}] socket=${socket || '?'} tdp=${data.tdp_watts ?? '?'}  ${cpu.nombre.slice(0, 55)}`);
+      console.log(`   OK [${contador.ok}] socket=${socket || '?'} tdp=${data.tdp_watts ?? '?'} nuc=${data.nucleos ?? '?'} ghz=${data.frecuencia_ghz ?? '?'}  ${cpu.nombre.slice(0, 45)}`);
     } catch (e) {
       contador.err++;
       console.error(`   ! ${cpu.nombre}: ${e.message}`);
@@ -86,7 +134,6 @@ async function worker(context, cola, contador) {
 async function main() {
   console.log('>>> Rellenando specs de CPUs (paralelo)');
 
-  // TODAS las CPUs (para rellenar los campos que falten, no solo las PENDIENTE).
   const cpus = await prisma.componentes.findMany({
     where: { tipo: 'cpu' },
     include: { ofertas: true },
@@ -102,7 +149,7 @@ async function main() {
     locale: 'es-ES',
     viewport: { width: 1366, height: 768 },
   });
-  // Solo bloqueamos imagenes y fuentes (el CSS se deja para no romper el acordeon).
+  // Bloqueamos imagenes, fuentes y media (el CSS se deja para no romper el acordeon).
   await context.route('**/*', (route) => {
     const t = route.request().resourceType();
     if (t === 'image' || t === 'font' || t === 'media') return route.abort();
