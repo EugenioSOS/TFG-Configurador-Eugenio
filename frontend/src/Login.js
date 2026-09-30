@@ -1,44 +1,64 @@
 import React, { useState } from 'react';
-import { Button, TextField, Box, Typography } from '@mui/material';
-import axios from 'axios';
+import { Button, TextField, Box, Typography, Link, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import api from './api';
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [cargando, setCargando] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    setError('');
+    if (!username || !password) { setError('Introduce usuario y contraseña'); return; }
+    setCargando(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/login', { username, password });
+      const res = await api.post('/login', { username, password });
       localStorage.setItem('token', res.data.token);
-      onLogin(res.data.token);  // Guardamos el token en el estado del componente superior
-      navigate('/questions'); // Redirige a la pantalla de preguntas
-    } catch (error) {
-      setError('Error al iniciar sesión');
+      if (onLogin) onLogin(res.data.token);
+      navigate('/questions');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Error al iniciar sesión');
+    } finally {
+      setCargando(false);
     }
   };
 
+  // Permite entrar pulsando Enter
+  const onKeyDown = (e) => { if (e.key === 'Enter') handleLogin(); };
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, padding: 2 }}>
-       <img src="/pc_configurator.png" alt="Logo" style={{ width: 100, height: 'auto' }} />
-      <Typography variant="h6">Iniciar sesión</Typography>
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, p: 3, maxWidth: 360, mx: 'auto', mt: 6 }}>
+      <Typography variant="h5">Iniciar sesión</Typography>
+
+      {error && <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>}
+
       <TextField
         label="Usuario"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
-        halfWidth
+        onKeyDown={onKeyDown}
+        fullWidth
       />
       <TextField
         label="Contraseña"
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        halfWidth
+        onKeyDown={onKeyDown}
+        fullWidth
       />
-      {error && <Typography color="error">{error}</Typography>}
-      <Button onClick={handleLogin} variant="contained">Entrar</Button>
+
+      <Button onClick={handleLogin} variant="contained" fullWidth disabled={cargando}>
+        {cargando ? 'Entrando…' : 'Entrar'}
+      </Button>
+
+      <Typography variant="body2">
+        ¿No tienes cuenta?{' '}
+        <Link component="button" onClick={() => navigate('/register')}>Regístrate</Link>
+      </Typography>
     </Box>
   );
 };

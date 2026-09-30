@@ -1,96 +1,94 @@
 import React, { useState } from 'react';
-import { Button, TextField, Box, Typography } from '@mui/material';
-import axios from 'axios';
+import {
+  Box, Typography, ToggleButton, ToggleButtonGroup, TextField,
+  Button, Stepper, Step, StepLabel, Alert,
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import BarraSuperior from './barrasuperior';
+
+const PASOS = ['Uso del PC', 'Presupuesto', 'Nivel'];
 
 const QuestionForm = () => {
-  const [usage, setUsage] = useState('');
-  const [budget, setBudget] = useState('');
+  const [paso, setPaso] = useState(0);
+  const [uso, setUso] = useState('');
+  const [presupuesto, setPresupuesto] = useState('');
+  const [nivel, setNivel] = useState('');   // 'auto' (simple) | 'manual' (avanzado)
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('No se encontró el token. Por favor, inicia sesión nuevamente.');
-        return;
-      }
-
-      const res = await axios.post('http://localhost:5000/api/getComponents', { usage, budget }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      const components = res.data;
-
-      // Función flexible para buscar por categoría (parcial, insensible a mayúsculas)
-      const findByCategory = (keyword, index = 0) => {
-        const matches = components.filter(c =>
-          c.category && c.category.toLowerCase().includes(keyword.toLowerCase())
-        );
-        return matches[index % matches.length] || null;
-      };
-
-      // Crear 3 configuraciones con componentes distintos por índice
-      const configurations = [0, 1, 2].map(i => ({
-        gpu: findByCategory('tarjeta', i),
-        cpu: findByCategory('cpu', i),
-        placa_base: findByCategory('placa', i),
-        memoria: findByCategory('ram', i),
-        almacenamiento: findByCategory('almacenamiento', i),
-        disipador: findByCategory('disipador', i),
-        fuente_alimentacion: findByCategory('fuente', i),
-        caja: findByCategory('caja', i),
-      }));
-
-      localStorage.setItem('configurations', JSON.stringify(configurations));
-      navigate('/select-components');
-
-    } catch (error) {
-      console.error('Error al obtener los componentes:', error);
-      alert('Error al obtener los componentes');
+  const siguiente = () => {
+    setError('');
+    if (paso === 0 && !uso) return setError('Elige para qué usarás el PC.');
+    if (paso === 1) {
+      const p = Number(presupuesto);
+      if (!p || p < 200) return setError('Introduce un presupuesto válido (mínimo 200 €).');
     }
+    if (paso === 2 && !nivel) return setError('Indica si quieres elegir tú los componentes.');
+    if (paso < 2) { setPaso(paso + 1); return; }
+    finalizar();
   };
-  const handleGoAdvanced = () => {
-    navigate('/advanced-configuration');
+
+  const atras = () => { setError(''); setPaso(Math.max(0, paso - 1)); };
+
+  const finalizar = () => {
+    // Guardamos uso y presupuesto para las siguientes pantallas.
+    localStorage.setItem('uso', uso);
+    localStorage.setItem('presupuesto', presupuesto);
+    // Bifurcacion: manual -> configurador avanzado ; auto -> configurador simple
+    if (nivel === 'manual') navigate('/configurador-avanzado', { state: { uso, presupuesto } });
+    else navigate('/configurador-simple', { state: { uso, presupuesto } });
   };
 
   return (
-    <Box>
-      <Typography variant="h6">¿Para qué usarás el PC?</Typography>
-      <Button onClick={() => setUsage('gaming')}>Gaming</Button>
-      <Button onClick={() => setUsage('work')}>Trabajo</Button>
-      <Button onClick={() => setUsage('mixed')}>Mixto</Button>
-      <Button onClick={() => setUsage('design')}>Diseño</Button>
-      <Button onClick={() => setUsage('programming')}>Programación</Button>
-      
-      
+    <>
+    <BarraSuperior />
+    <Box sx={{ maxWidth: 520, mx: 'auto', mt: 5, p: 3 }}>
+      <Stepper activeStep={paso} sx={{ mb: 4 }}>
+        {PASOS.map((p) => (<Step key={p}><StepLabel>{p}</StepLabel></Step>))}
+      </Stepper>
 
-      <Typography variant="h6" style={{ marginTop: 20 }}>¿Cuál es tu presupuesto?</Typography>
-      <TextField
-        type="number"
-        value={budget}
-        onChange={(e) => setBudget(e.target.value)}
-        label="Presupuesto en €"
-        fullWidth
-        margin="normal"
-      />
+      {error && <Alert severity="warning" sx={{ mb: 2 }}>{error}</Alert>}
 
-      <Button onClick={handleSubmit} variant="contained" sx={{ mt: 2 }}>
-        Ver Componentes
-      </Button>
-      <Button onClick={handleGoAdvanced} variant="contained" color="secondary" sx={{ mt: 2, ml: 2 }}>
-        Configuración Avanzada
-      </Button>
-      <Button onClick={() => navigate(-1)} variant="outlined" sx={{ mt: 2 }}>
-        Volver atrás
-      </Button>
+      {paso === 0 && (
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>¿Para qué vas a usar el PC?</Typography>
+          <ToggleButtonGroup exclusive value={uso} onChange={(e, v) => v && setUso(v)} orientation="vertical" sx={{ width: '100%' }}>
+            <ToggleButton value="juegos">🎮 Juegos</ToggleButton>
+            <ToggleButton value="diseno">🎨 Diseño / Render</ToggleButton>
+            <ToggleButton value="ofimatica">📄 Ofimática</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+      )}
+
+      {paso === 1 && (
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>¿Cuál es tu presupuesto?</Typography>
+          <TextField
+            type="number" label="Presupuesto (€)" value={presupuesto}
+            onChange={(e) => setPresupuesto(e.target.value)} fullWidth
+            InputProps={{ inputProps: { min: 200, step: 50 } }}
+          />
+        </Box>
+      )}
+
+      {paso === 2 && (
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>¿Cómo prefieres montarlo?</Typography>
+          <ToggleButtonGroup exclusive value={nivel} onChange={(e, v) => v && setNivel(v)} orientation="vertical" sx={{ width: '100%' }}>
+            <ToggleButton value="auto">✨ Que me recomienden una configuración</ToggleButton>
+            <ToggleButton value="manual">🔧 Elegir yo cada componente</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+      )}
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+        <Button onClick={atras} disabled={paso === 0}>Atrás</Button>
+        <Button variant="contained" onClick={siguiente}>
+          {paso < 2 ? 'Siguiente' : 'Ver configuración'}
+        </Button>
+      </Box>
     </Box>
+    </>
   );
 };
 

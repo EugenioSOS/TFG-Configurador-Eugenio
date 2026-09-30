@@ -1,47 +1,36 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React from 'react';
 import Login from './Login';
+import Register from './Register';
 import QuestionForm from './QuestionForm';
-import SelectComponents from './SelectComponents';
-import AdvancedConfiguration from './AdvancedConfiguration';
+import ConfiguradorSimple from './configuradorsimple';
+import ConfiguradorAvanzado from './configuradoravanzado';
+import MisPresupuestos from './mispresupuestos';
+
+// Protege rutas: si no hay token, manda al login.
+const Privada = ({ children }) => {
+  const token = localStorage.getItem('token');
+  return token ? children : <Navigate to="/" replace />;
+};
 
 const App = () => {
-  const [recommendedComponents, setRecommendedComponents] = useState([]);
-  const [usage, setUsage] = useState('');
-  const [budget, setBudget] = useState('');
-
   const handleLogin = (token) => {
-    localStorage.setItem('token', token); // Guardamos el token en localStorage
+    localStorage.setItem('token', token);
   };
 
-  const handleNext = ({ components, usageSelected, budgetSelected }) => {
-    setRecommendedComponents(components || []);
-    if (usageSelected !== undefined) setUsage(usageSelected);
-    if (budgetSelected !== undefined) setBudget(budgetSelected);
-  };
-
-return (
+  return (
     <Router>
       <Routes>
         <Route path="/" element={<Login onLogin={handleLogin} />} />
-        <Route
-          path="/questions"
-          element={
-            <QuestionForm
-              onNext={handleNext}
-              usageSelected={usage}
-              budgetSelected={budget}
-              // (opcional) si prefieres levantar el estado
-              setUsageSelected={setUsage}
-              setBudgetSelected={setBudget}
-            />
-          }
-        />
-        <Route
-          path="/select-components"
-          element={<SelectComponents recommendedComponents={recommendedComponents} />}
-        />
-        <Route path="/advanced-configuration" element={<AdvancedConfiguration />} />
+        <Route path="/register" element={<Register />} />
+
+        <Route path="/questions" element={<Privada><QuestionForm /></Privada>} />
+        <Route path="/configurador-simple" element={<Privada><ConfiguradorSimple /></Privada>} />
+        <Route path="/configurador-avanzado" element={<Privada><ConfiguradorAvanzado /></Privada>} />
+        <Route path="/mis-presupuestos" element={<Privada><MisPresupuestos /></Privada>} />
+
+        {}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

@@ -1,4 +1,7 @@
-
+// generador.js
+// Configurador simple: dado un uso y un presupuesto, arma builds compatibles.
+// Respeta dependencias: CPU -> placa (mismo socket) -> RAM (mismo tipo) -> ...
+// Reparte el presupuesto por porcentajes segun el uso.
 
 const prisma = require('./db');
 const { analizarBuild } = require('./compatibilidad');
@@ -37,22 +40,39 @@ function armarBuild(cat, uso, presupuesto, factorGama) {
   const rep = REPARTO[uso] || REPARTO.juegos;
   const tope = (pieza) => presupuesto * (rep[pieza] || 0) * factorGama;
 
-  // 1) CPU
-  const cpu = elegir(cat.cpu, tope('cpu'));
-  // 2) Placa que case el socket de la CPU
+  // Como 'elegir' ya cae a la mas barata si nada entra en el tope, las piezas
+  // OBLIGATORIAS (cpu, placa, ram, almacenamiento, fuente, caja) nunca quedan a null
+  // mientras exista alguna compatible en el catalogo.
+
+  // 1) CPU + PLACA JUNTAS: elegimos una CPU para la que EXISTA placa compatible,
+  //    y de esas la mejor dentro del tope. Asi la placa nunca falta (Opcion A).
+  const socketsConPlaca = new Set(cat.placa.map((p) => norm(p.socket)));
+  const cpu = elegir(cat.cpu, tope('cpu'), (c) => socketsConPlaca.has(norm(c.socket)))
+    || elegir(cat.cpu, tope('cpu'));   // fallback: cualquier CPU si no hubiera match
+
+  // 2) Placa que case el socket de la CPU (garantizada por el paso anterior)
   const placa = elegir(cat.placa, tope('placa'), (p) => !cpu || norm(p.socket) === norm(cpu.socket));
+
   // 3) RAM que case el tipo de la placa
-  const ram = elegir(cat.ram, tope('ram'), (r) => !placa || (placa.tipo_ram && r.tipo && placa.tipo_ram.toUpperCase() === r.tipo.toUpperCase()));
-  // 4) GPU (si el uso la lleva)
-  const gpu = rep.gpu > 0 ? elegir(cat.gpu, tope('gpu')) : null;
-  // 5) Almacenamiento
+  const ram = elegir(cat.ram, tope('ram'),
+    (r) => !placa || !placa.tipo_ram || !r.tipo || placa.tipo_ram.toUpperCase() === r.tipo.toUpperCase());
+
+  // 4) GPU (si el uso la lleva, o si la CPU no tiene graficos integrados)
+  const necesitaGpu = rep.gpu > 0 || (cpu && cpu.grafica_integrada === false);
+  const gpu = necesitaGpu ? elegir(cat.gpu, tope('gpu')) : null;
+
+  // 5) Almacenamiento (obligatorio)
   const almacenamiento = elegir(cat.almacenamiento, tope('almacenamiento'));
+
   // 6) Caja que admita el formato de la placa
-  const caja = elegir(cat.caja, tope('caja'), (c) => !placa || (c.formatos_admitidos || []).includes(placa.formato));
+  const caja = elegir(cat.caja, tope('caja'),
+    (c) => !placa || !placa.formato || (c.formatos_admitidos || []).includes(placa.formato));
+
   // 7) Refrigeracion compatible con el socket (o sin lista de sockets)
   const refrigeracion = elegir(cat.refrigeracion, tope('refrigeracion'),
     (r) => !cpu || !(r.socket_compat && r.socket_compat.length) || r.socket_compat.map(norm).includes(norm(cpu.socket)));
-  // 8) Fuente suficiente para el consumo estimado
+
+  // 8) Fuente suficiente para el consumo estimado (obligatoria)
   const consumo = (cpu?.tdp_watts || 0) + (gpu?.tdp_watts || 0);
   const wattsMin = Math.max(Math.ceil((consumo * 1.4) / 50) * 50, gpu?.watts_recomendados || 0, 400);
   const fuente = elegir(cat.fuente, tope('fuente'), (f) => (f.watts || 0) >= wattsMin)
