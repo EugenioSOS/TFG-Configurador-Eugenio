@@ -23,6 +23,13 @@ function normSocket(v) {
   return s || null;
 }
 function normTipoRam(v) { if (!v) return null; const m = v.match(/DDR\d/i); return m ? m[0].toUpperCase() : null; }
+// El nombre manda si trae un DDR explicito (ej. "...Tomahawk DDR4"). Las placas
+// modernas sin DDR en el nombre son DDR5; el tipo final se decide con la ficha.
+function tipoRamDesdeNombre(nombre) {
+  if (!nombre) return null;
+  const m = nombre.match(/DDR\d/i);
+  return m ? m[0].toUpperCase() : null;
+}
 function normFormato(v) {
   if (!v) return null;
   const t = v.toLowerCase();
@@ -97,7 +104,9 @@ async function worker(context, cola, cont) {
     if (url) { try { campos = await extraerPlaca(page, url); } catch (e) {} }
 
     const socket = normSocket(campos['Socket']) || socketDesdeNombre(placa.nombre);
-    const tipoRam = normTipoRam(campos['Memoria']) || normTipoRam(campos.__tipoRamTexto);
+    const tipoRam = tipoRamDesdeNombre(placa.nombre)   // DDR explicito en el nombre manda
+      || normTipoRam(campos['Memoria'])
+      || normTipoRam(campos.__tipoRamTexto);
     const formato = normFormato(campos['Formato']);
     const chipset = campos['Chipset'] || null;
 

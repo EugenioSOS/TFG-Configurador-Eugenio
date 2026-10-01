@@ -1,8 +1,8 @@
-
 const prisma = require('../db');
 const { analizarBuild } = require('../compatibilidad');
 const { aplanar, INCLUDE_COMPLETO } = require('../aplanar_datos');
 const { generar } = require('../generador');
+const { parsePreferencias } = require('../preferencias');
 
 async function cargarComponente(id) {
   if (!id) return null;
@@ -13,7 +13,6 @@ async function cargarComponente(id) {
   return aplanar(comp);
 }
 
-// POST /api/builds/validar  (configurador AVANZADO: valida lo que el usuario elige)
 async function validarBuild(req, res) {
   try {
     const b = req.body || {};
@@ -40,18 +39,21 @@ async function validarBuild(req, res) {
   }
 }
 
-// POST /api/builds/generar  (configurador SIMPLE: arma builds automaticas)
-// body: { uso: 'juegos'|'diseno'|'ofimatica', presupuesto: 1200 }
 async function generarBuild(req, res) {
   try {
-    const { uso, presupuesto } = req.body || {};
+    const { uso, presupuesto, preferencias } = req.body || {};
     if (!uso || !presupuesto)
       return res.status(400).json({ error: 'Faltan uso o presupuesto' });
     if (!['juegos', 'diseno', 'ofimatica'].includes(uso))
       return res.status(400).json({ error: "uso debe ser 'juegos', 'diseno' u 'ofimatica'" });
 
-    const builds = await generar(uso, presupuesto);
-    res.json({ uso, presupuesto: Number(presupuesto), builds });
+    const minimo = uso === 'ofimatica' ? 500 : 800;
+    if (Number(presupuesto) < minimo)
+      return res.status(400).json({ error: `El presupuesto minimo para ${uso} es ${minimo} €.` });
+
+    const { filtros, entendido } = parsePreferencias(preferencias);
+    const builds = await generar(uso, presupuesto, filtros);
+    res.json({ uso, presupuesto: Number(presupuesto), builds, preferencias: entendido });
   } catch (err) {
     console.error('Error generarBuild:', err);
     res.status(500).json({ error: 'Error al generar la configuracion' });

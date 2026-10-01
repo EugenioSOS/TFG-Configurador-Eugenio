@@ -1,0 +1,157 @@
+id,nombre,nucleos,hilos,nota
+197,AMD Ryzen 3 3100 (Wraith Stealth) 3.9Ghz Socket AM4 Boxed,4,8,
+55,AMD Ryzen 3 3200G (Wraith Stealth) 4.0GHz Socket AM4 Boxed,4,4,
+62,AMD Ryzen 3 4100 4.0GHz Socket AM4 Boxed,4,8,
+177,AMD Ryzen 3 4300G 4.0GHz Socket AM4 Boxed,4,8,
+141,AMD Ryzen 3 Pro 4350G 4.0GHz Socket AM4 MPK,4,8,
+26,AMD Ryzen 3 PRO 5355G 4.2GHz Socket AM4 MPK Tray,4,8,
+198,AMD Ryzen 5 3400G (Wraith Spire) 4.2Ghz Socket AM4 Boxed,4,4,
+199,AMD Ryzen 5 3600 4.2Ghz Socket AM4 Boxed,6,12,
+200,AMD Ryzen 5 3600X (Wraith Spire) 4.4Ghz Socket AM4 Boxed - Procesador,6,12,
+64,AMD Ryzen 5 4500 4.1GHz Socket AM4 Boxed,6,12,
+18,AMD Ryzen 5 5500 4.2GHz AM4 Boxed,6,12,
+10,AMD Ryzen 5 5500 4.2GHz Socket AM4 Boxed,6,12,
+85,AMD Ryzen 5 5500F 4.4GHz Socket AM4 Boxed,6,12,
+137,AMD Ryzen 5 5500F 4.4GHz Socket AM4 MPK,6,12,
+17,AMD Ryzen 5 5500F 4.4GHz Socket AM4 Tray,6,12,
+167,AMD Ryzen 5 5500GT 4.4GHz Socket AM4 Boxed,6,12,
+166,AMD Ryzen 5 5500GT 4.4GHz Socket AM4 Tray,6,12,
+50,AMD Ryzen 5 5600 4.4GHz Socket AM4 Boxed,6,12,
+108,AMD Ryzen 5 5600G 4.4GHz Socket AM4 Boxed,6,12,
+142,AMD Ryzen 5 5600GT 4.6GHz Socket AM4 Boxed,6,12,
+165,AMD Ryzen 5 5600GT 4.6GHz Socket AM4 MPK,6,12,
+111,AMD Ryzen 5 5600X 4.6GHz Socket AM4 Boxed,6,12,
+98,AMD Ryzen 5 5600XT 4.7GHz Socket AM4 Boxed,6,12,
+140,AMD Ryzen 5 7500 5.0GHz Socket AM5 Boxed,6,12,
+138,AMD Ryzen 5 7500 5.0GHz Socket AM5 MPK,6,12,
+139,AMD Ryzen 5 7500 5.0GHz Socket AM5 Tray,6,12,
+19,AMD Ryzen 5 7500F 5.0GHz Socket AM5 Tray,6,12,
+94,AMD Ryzen 5 7600 5.1GHz Socket AM5 Boxed,6,12,
+149,AMD Ryzen 5 7600 5.1GHz Socket AM5 MPK,6,12,
+15,AMD Ryzen 5 7600 5.1GHz Socket AM5 Tray,,,REVISAR
+27,AMD Ryzen 5 7600X 5.3GHz Socket AM5 Boxed,6,12,
+69,AMD Ryzen 5 8400F 4.7GHz Socket AM5 Boxed,6,12,
+65,AMD Ryzen 5 8500G 5.0GHz Socket AM5 Boxed,6,12,
+90,AMD Ryzen 5 8600G 5.0GHz Socket AM5 Boxed,6,12,
+179,AMD Ryzen 5 Pro 3600 4.2GHz Socket AM4 Tray,6,12,
+122,AMD Ryzen 7 5700 4.6GHz Socket AM4 Tray,8,16,
+74,AMD Ryzen 7 5700G 4.6GHz Socket AM4 Boxed,8,16,
+93,AMD Ryzen 7 5700X 4.6GHz Socket AM4 Boxed,8,16,
+14,AMD Ryzen 7 5700X 4.6GHz Socket AM4 MPK,8,16,
+16,AMD Ryzen 7 5800X 4.7Ghz Socket AM4 Boxed,8,16,
+160,AMD Ryzen 7 5800XT 4.8GHz Socket AM4 Boxed,8,16,
+135,AMD Ryzen 7 7700 5.3GHz Socket AM5 Boxed,8,16,
+101,AMD Ryzen 7 7700 5.3GHz Socket AM5 Tray,8,16,
+54,AMD Ryzen 7 7700X 5.4GHz Socket AM5 Boxed,8,16,
+83,AMD Ryzen 7 7700X 5.4GHz Socket AM5 Tray,8,16,
+22,AMD Ryzen 7 7800X3D 5.0GHz Socket AM5 Boxed,8,16,
+164,AMD Ryzen 7 8700G 5.1GHz Socket AM5 Boxed,8,16,
+163,AMD Ryzen 7 8700G 5.1GHz Socket AM5 MPK,8,16,
+25,AMD Ryzen 7 9700X 5.5GHz Socket AM5 Boxed,8,16,
+148,AMD Ryzen 7 9700X 5.5GHz Socket AM5 MPK,8,16,
+151,AMD Ryzen 7 9700X 5.5GHz Socket AM5 Tray,8,16,
+76,AMD Ryzen 7 9850X3D 5.6GHz Socket AM5 Boxed,8,16,
+99,AMD Ryzen 7 9850X3D 5.6GHz Socket AM5 Tray,8,16,
+67,AMD Ryzen 9 5900XT 4.8GHz Socket AM4 Boxed,12,24,
+84,AMD Ryzen 9 5950X 4.9Ghz Socket AM4 Boxed,16,32,
+120,AMD Ryzen 9 7900 5.4GHz Socket AM5 Boxed,12,24,
+79,AMD Ryzen 9 7900X 5.6GHz Socket AM5 Boxed,12,24,
+187,AMD Ryzen 9 7950X 5.7GHz Socket AM5 Boxed,16,32,
+178,AMD Ryzen 9 7950X3D 5.7GHz Socket AM5 Boxed,16,32,
+4,AMD Ryzen 9 9900X 5.6GHz Socket AM5 Boxed,12,24,
+100,AMD Ryzen 9 9900X3D 5.5GHz Socket AM5 Boxed,12,24,
+21,AMD Ryzen 9 9950X 5.7GHz Socket AM5 Boxed,16,32,
+6,AMD Ryzen 9 9950X3D 5.7GHz Socket AM5 Boxed,16,32,
+78,AMD Ryzen 9 9950X3D 5.7GHz Socket AM5 Tray,16,32,
+46,AMD Threadripper 7960X 5.3Ghz Socket sTR5 Boxed,24,48,REVISAR
+168,AMD Threadripper 7960X 5.3Ghz Socket sTR5 Tray,24,48,REVISAR
+47,AMD Threadripper 7970X 5.3Ghz Socket sTR5 Boxed,32,64,REVISAR
+169,AMD Threadripper 7970X 5.3Ghz Socket sTR5 Tray,32,64,REVISAR
+44,AMD Threadripper 7980X 5.1Ghz Socket sTR5 Boxed,64,128,REVISAR
+35,AMD Threadripper 7980X 5.1Ghz Socket sTR5 Tray,64,128,REVISAR
+176,AMD Threadripper Pro 5955WX 4.5Ghz Socket sWRX8 Boxed,16,32,REVISAR
+39,AMD Threadripper Pro 5965WX 4.5Ghz Socket sWRX8 Boxed,24,48,REVISAR
+188,AMD Threadripper Pro 5975WX 4.5Ghz Socket sWRX8 Boxed,32,64,REVISAR
+38,AMD Threadripper Pro 7965WX 5.3Ghz Socket SP6 Boxed,24,48,REVISAR
+110,AMD Threadripper Pro 7965WX 5.3Ghz Socket SP6 Tray,24,48,REVISAR
+33,AMD Threadripper Pro 7975WX 5.3Ghz Socket SP6 Boxed,32,64,REVISAR
+170,AMD Threadripper Pro 7975WX 5.3Ghz Socket SP6 Tray,32,64,REVISAR
+41,AMD Threadripper Pro 7985WX 5.1Ghz Socket SP6 Boxed,64,128,REVISAR
+171,AMD Threadripper Pro 7985WX 5.1Ghz Socket SP6 Tray,64,128,REVISAR
+30,AMD Threadripper Pro 7995WX 5.1Ghz Socket SP6 Boxed,96,192,REVISAR
+172,AMD Threadripper Pro 7995WX 5.1Ghz Socket SP6 Tray,96,192,REVISAR
+190,Intel Celeron G6900 3.4GHz Socket 1700 Boxed,2,2,
+193,Intel Core i3-10105F 4.4GHz Socket 1200 Boxed,4,8,
+113,Intel Core i3-12100 4.3GHz Socket 1700 Boxed,4,8,
+70,Intel Core i3-12100F 4.3GHz Socket 1700 Boxed,4,8,
+181,Intel Core i3-13100 4.5GHz Socket 1700 Boxed,4,8,
+182,Intel Core i3-13100F 4.5GHz Socket 1700 Boxed,4,8,
+48,Intel Core i3-14100 4.7GHz Socket 1700 Boxed,4,8,
+115,Intel Core i3-14100F 4.7GHz Socket 1700 Boxed,4,8,
+195,Intel Core i5-10400 4.3GHz Socket 1200 Boxed,6,12,
+196,Intel Core i5-10400F 4.3GHz Socket 1200 Boxed,6,12,
+194,Intel Core i5-11400 4.4GHz Socket 1200 Boxed,6,12,
+92,Intel Core i5-12400 4.4GHz Socket 1700 Boxed,6,12,
+119,Intel Core i5-12400 4.4GHz Socket 1700 Tray,6,12,
+63,Intel Core i5-12400F 4.4GHz Socket 1700 Boxed,6,12,
+109,Intel Core i5-12500 4.6GHz Socket 1700 Boxed,6,12,
+9,Intel Core i5-12600 4.8GHz Socket 1700 Boxed,6,12,
+130,Intel Core i5-12600K 4.9GHz Socket 1700 Boxed,10,,REVISAR
+11,Intel Core i5-12600KF 4.9GHz Socket 1700 Boxed,10,,REVISAR
+183,Intel Core i5-13400 4.6GHz Socket 1700 Boxed,10,,REVISAR
+184,Intel Core i5-13400F 4.6GHz Socket 1700 Boxed,10,,REVISAR
+156,Intel Core i5-13400F 4.6GHz Socket 1700 Tray,10,,REVISAR
+186,Intel Core i5-13600KF 5.1GHz Socket 1700 Boxed,14,,REVISAR
+123,Intel Core i5-14400 4.7GHz Socket 1700 Boxed,10,,REVISAR
+81,Intel Core i5-14400 4.7GHz Socket 1700 Tray,10,,REVISAR
+96,Intel Core i5-14400F 4.7GHz Socket 1700 Boxed,10,,REVISAR
+97,Intel Core i5-14500 5.0GHz Socket 1700 Boxed,14,,REVISAR
+57,Intel Core i5-14600K 5.3GHz Socket 1700 Boxed,14,,REVISAR
+60,Intel Core i5-14600KF 5.3GHz Socket 1700 Boxed,14,,REVISAR
+52,Intel Core i7-12700 4.9GHz Socket 1700 Boxed,12,,REVISAR
+59,Intel Core i7-12700K 5.0GHz Socket 1700 Boxed,12,,REVISAR
+133,Intel Core i7-12700K 5.0GHz Socket 1700 Tray,12,,REVISAR
+95,Intel Core i7-12700KF 5.0GHz Socket 1700 Boxed,12,,REVISAR
+117,Intel Core i7-12700KF 5.0GHz Socket 1700 Tray,8,,REVISAR
+134,Intel Core i7-12700T 4.9GHz Socket 1700 Tray,12,,REVISAR
+185,Intel Core i7-13700 5.2GHz Socket 1700 Boxed,16,,REVISAR
+8,Intel Core i7-13700F 5.2GHz Socket 1700 Boxed,16,,REVISAR
+5,Intel Core i7-13700KF 5.4GHz Socket 1700 Boxed,16,,REVISAR
+175,Intel Core i7-13700T 4.9GHz Socket 1700,16,,REVISAR
+66,Intel Core i7-14700 5.4GHz Socket 1700 Boxed,20,,REVISAR
+87,Intel Core i7-14700 5.4GHz Socket 1700 Tray,20,,REVISAR
+68,Intel Core i7-14700F 5.4GHz Socket 1700 Boxed,20,,REVISAR
+58,Intel Core i7-14700K 5.6GHz Socket 1700 Boxed,20,,REVISAR
+49,Intel Core i7-14700KF 5.6GHz Socket 1700 Boxed,20,,REVISAR
+131,Intel Core i7-14700KF 5.6GHz Socket 1700 Tray,20,,REVISAR
+103,Intel Core i9-12900 5.1GHz Socket 1700 Boxed,16,,REVISAR
+191,Intel Core i9-12900F 5.1GHz Socket 1700 Boxed,16,,REVISAR
+106,Intel Core i9-12900K 5.20GHz Socket 1700 Boxed,16,,REVISAR
+72,Intel Core i9-12900KF 5.2GHz Socket 1700 Boxed,16,,REVISAR
+189,Intel Core i9-12900KS 5.50GHz Socket 1700 Boxed,16,,REVISAR
+136,Intel Core i9-13900K 5.8GHz Socket 1700 Boxed,24,,REVISAR
+143,Intel Core i9-13900KF 5.8GHz Socket 1700 Boxed,24,,REVISAR
+180,Intel Core i9-13900KS 6.0GHz Socket 1700 Boxed,24,,REVISAR
+128,Intel Core i9-14900 5.8GHz Socket 1700 Boxed,24,,REVISAR
+88,Intel Core i9-14900F 5.8GHz Socket 1700 Boxed,24,,REVISAR
+23,Intel Core i9-14900K 6.0GHz Socket 1700 Boxed,24,,REVISAR
+77,Intel Core i9-14900KF 6.0GHz Socket 1700 Boxed,24,,REVISAR
+80,Intel Core i9-14900KF 6.0GHz Socket 1700 Tray,24,,REVISAR
+3,Intel Core i9-14900KS 6.2GHz Socket 1700 Boxed,24,,REVISAR
+53,Intel Core Ultra 5 225 4.9GHz Socket 1851 Boxed,10,,REVISAR
+114,Intel Core Ultra 5 225F 4.9GHz Socket 1851 Boxed,10,,REVISAR
+116,Intel Core Ultra 5 235 5.0GHz Socket 1851 Boxed,44,,REVISAR
+73,Intel Core Ultra 5 245K 5.2GHz Socket 1851 Boxed,6,,REVISAR
+12,Intel Core Ultra 5 245KF 5.2GHz Socket 1851 Boxed,14,,REVISAR
+121,Intel Core Ultra 5 250K Plus 5.3GHz Socket 1851 Boxed,6,,REVISAR
+102,Intel Core Ultra 5 250KF Plus 5.3GHz Socket 1851 Boxed,6,,REVISAR
+157,Intel Core Ultra 7 265K 5.5GHz Socket 1851 Boxed,20,,REVISAR
+86,Intel Core Ultra 7 265KF 5.5GHz Socket 1851 Boxed,8,,REVISAR
+91,Intel Core Ultra 7 270K Plus 5.5GHz Socket 1851 Boxed,4,,REVISAR
+82,Intel Core Ultra 9 285 5.6GHz Socket 1851 Boxed,24,,REVISAR
+124,Intel Core Ultra 9 285K 5.7GHz Socket 1851 Boxed,24,,REVISAR
+104,Intel Core Ultra 9 285K 5.7GHz Socket 1851 Tray,24,,REVISAR
+192,Intel Pentium Gold G6400 4.0GHz Socket 1200 Boxed,2,2,
+118,Intel Pentium Gold G7400 3.7GHz Socket 1700 Boxed,2,2,
+161,Intel Xeon W W5-2465X 4.7GHz Socket 4677 Boxed,16,,REVISAR
+144,Intel Xeon W5-2555X 4.8GHz Socket 4677,14,,REVISAR

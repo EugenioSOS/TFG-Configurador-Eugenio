@@ -1,6 +1,4 @@
-// aplanar.js
-// Convierte un componente de la BD (base + tabla de tipo + ofertas) en el objeto
-// plano que espera el motor de compatibilidad: { nombre, tipo, precio, ...specs }.
+
 
 // Mapa tipo -> nombre de la relacion 1-a-1 en Prisma (ajustar si tu schema difiere).
 const RELACION_TIPO = {
@@ -22,18 +20,22 @@ function aplanar(componente) {
   const specs = (rel && componente[rel]) ? componente[rel] : {};
   // precio = el menor de sus ofertas (ya vienen ordenadas asc)
   const oferta = componente.ofertas && componente.ofertas[0];
-  return Object.assign(
-    {
-      id: componente.id,
-      nombre: componente.nombre,
-      tipo: componente.tipo,
-      marca: componente.marca,
-      imagen_url: componente.imagen_url,
-      precio: oferta ? Number(oferta.precio) : null,
-      url: oferta ? oferta.url : null,
-    },
-    specs   // socket, tdp_watts, formato, longitud_mm, etc.
-  );
+  // Las specs van PRIMERO; los campos del componente van DESPUES para que no los
+  // pise una spec con el mismo nombre. Ojo: ram.tipo (DDR5) y almacenamiento.tipo
+  // (SSD) chocaban con componente.tipo ('ram'/'almacenamiento') -> por eso el 'tipo'
+  // final debe ser SIEMPRE el del componente.
+  const plano = Object.assign({}, specs, {
+    id: componente.id,
+    nombre: componente.nombre,
+    tipo: componente.tipo,                 // 'cpu','ram','almacenamiento'... (manda este)
+    marca: componente.marca,
+    imagen_url: componente.imagen_url,
+    precio: oferta ? Number(oferta.precio) : null,
+    url: oferta ? oferta.url : null,
+  });
+  // Conservar la spec 'tipo' (DDR5 / SSD NVMe) con otro nombre, por si se quiere mostrar.
+  if (specs && specs.tipo !== undefined) plano.tipo_spec = specs.tipo;
+  return plano;
 }
 
 module.exports = { aplanar, INCLUDE_COMPLETO, RELACION_TIPO };

@@ -8,7 +8,7 @@ import api from './api';
 import GuardarBuild from './guardarbuild';
 import BarraSuperior from './barrasuperior';
 
-const NOMBRE_GAMA = { economica: 'Económica', equilibrada: 'Equilibrada', alta: 'Gama alta' };
+const NOMBRE_GAMA = { economica: 'Económica', equilibrada: 'Equilibrada' };
 const TIPOS = [
   ['cpu', 'Procesador'], ['placa', 'Placa base'], ['ram', 'Memoria RAM'],
   ['gpu', 'Tarjeta gráfica'], ['almacenamiento', 'Almacenamiento'],
@@ -17,6 +17,7 @@ const TIPOS = [
 
 const ConfiguradorSimple = () => {
   const [builds, setBuilds] = useState(null);
+  const [prefEntendidas, setPrefEntendidas] = useState([]);
   const [gama, setGama] = useState('equilibrada');
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
@@ -24,13 +25,15 @@ const ConfiguradorSimple = () => {
 
   const uso = localStorage.getItem('uso');
   const presupuesto = localStorage.getItem('presupuesto');
+  const preferencias = localStorage.getItem('preferencias') || '';
 
   useEffect(() => {
     if (!uso || !presupuesto) { navigate('/questions'); return; }
     (async () => {
       try {
-        const res = await api.post('/builds/generar', { uso, presupuesto: Number(presupuesto) });
+        const res = await api.post('/builds/generar', { uso, presupuesto: Number(presupuesto), preferencias });
         setBuilds(res.data.builds);
+        setPrefEntendidas(res.data.preferencias || []);
       } catch (err) {
         setError(err.response?.data?.error || 'Error al generar la configuración');
       } finally {
@@ -48,6 +51,13 @@ const ConfiguradorSimple = () => {
   if (!builds) return null;
 
   const build = builds[gama];
+
+  const personalizar = () => {
+    const componentes = {};
+    Object.entries(build.piezas).forEach(([k, v]) => { if (v && v.id) componentes[k] = v.id; });
+    localStorage.setItem('editarBuild', JSON.stringify({ componentes }));  // sin buildId -> se guardara como nueva
+    navigate('/configurador-avanzado');
+  };
   const piezas = build.piezas;
 
   return (
@@ -58,6 +68,11 @@ const ConfiguradorSimple = () => {
       <Typography color="text.secondary" gutterBottom>
         Uso: {uso} · Presupuesto: {presupuesto} €
       </Typography>
+      {prefEntendidas.length > 0 && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Preferencias aplicadas: {prefEntendidas.join(' · ')}
+        </Alert>
+      )}
 
       <Tabs value={gama} onChange={(e, v) => setGama(v)} sx={{ mb: 2 }}>
         {Object.keys(builds).map((g) => (
@@ -107,11 +122,11 @@ const ConfiguradorSimple = () => {
       </Grid>
 
       <Divider sx={{ my: 3 }} />
-      <Box sx={{ display: 'flex', justifyContºent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h6">Total: {build.total} €</Typography>
         <Box>
-          <Button onClick={() => navigate('/questions')} sx={{ mr: 1 }}>Volver</Button>
-          <Button variant="contained" onClick={() => navigate('/configurador-avanzado')}>
+          <Button onClick={() => navigate(-1)} sx={{ mr: 1 }}>Volver</Button>
+          <Button variant="contained" onClick={personalizar}>
             Personalizar
           </Button>
           <GuardarBuild

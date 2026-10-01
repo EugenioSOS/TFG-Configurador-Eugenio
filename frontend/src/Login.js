@@ -17,6 +17,11 @@ const Login = ({ onLogin }) => {
     try {
       const res = await api.post('/login', { username, password });
       localStorage.setItem('token', res.data.token);
+      // Nueva sesión: limpiar el flujo anterior para empezar en blanco.
+      localStorage.removeItem('uso');
+      localStorage.removeItem('presupuesto');
+      localStorage.removeItem('preferencias');
+      localStorage.removeItem('editarBuild');
       if (onLogin) onLogin(res.data.token);
       navigate('/questions');
     } catch (err) {
@@ -26,12 +31,12 @@ const Login = ({ onLogin }) => {
     }
   };
 
-  // Permite entrar pulsando Enter
   const onKeyDown = (e) => { if (e.key === 'Enter') handleLogin(); };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, p: 3, maxWidth: 360, mx: 'auto', mt: 6 }}>
-      <Typography variant="h5">Iniciar sesión</Typography>
+      <img src="/pc_configurator.png" alt="Logo" style={{ width: 100, height: 'auto' }} />
+      <Typography variant="h6">Iniciar sesión</Typography>
 
       {error && <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>}
 

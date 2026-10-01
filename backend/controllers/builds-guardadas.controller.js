@@ -1,11 +1,9 @@
-
 const prisma = require('../db');
 const { aplanar, INCLUDE_COMPLETO } = require('../aplanar_datos');
 
 const TIPOS = ['cpu', 'placa', 'ram', 'gpu', 'almacenamiento', 'fuente', 'refrigeracion', 'caja'];
 
-// POST /api/builds/guardar
-// body: { nombre, uso, presupuesto, modo, componentes: { cpu: id, gpu: id, ... } }
+
 async function guardarBuild(req, res) {
   try {
     const usuarioId = req.usuario.id;
@@ -13,10 +11,9 @@ async function guardarBuild(req, res) {
     if (!componentes || Object.keys(componentes).length === 0)
       return res.status(400).json({ error: 'No hay componentes que guardar' });
 
-    // uso y modo son ENUMS en Prisma: solo valores validos, o null.
     const USOS = ['juegos', 'diseno', 'ofimatica'];
     const usoValido = USOS.includes(uso) ? uso : null;
-    // el front puede mandar 'avanzado'/'manual' -> lo mapeamos a 'detallado'
+   
     let modoValido = null;
     if (modo === 'simple' || modo === 'auto') modoValido = 'simple';
     else if (modo === 'detallado' || modo === 'avanzado' || modo === 'manual') modoValido = 'detallado';
@@ -50,7 +47,7 @@ async function guardarBuild(req, res) {
   }
 }
 
-// GET /api/builds/mis-builds
+
 async function misBuild(req, res) {
   try {
     const usuarioId = req.usuario.id;
@@ -93,13 +90,13 @@ async function misBuild(req, res) {
   }
 }
 
-// DELETE /api/builds/:id
+
 async function borrarBuild(req, res) {
   try {
     const usuarioId = req.usuario.id;
     const id = Number(req.params.id);
     const build = await prisma.builds.findUnique({ where: { id } });
-    if (!build || build.usuario_id !== usuarioId)
+    if (!build || String(build.usuario_id) !== String(usuarioId))
       return res.status(404).json({ error: 'Configuracion no encontrada' });
 
     await prisma.builds.delete({ where: { id } });
@@ -110,4 +107,52 @@ async function borrarBuild(req, res) {
   }
 }
 
-module.exports = { guardarBuild, misBuild, borrarBuild };
+// PUT /api/builds/:id  -> actualiza una build existente del usuario (piezas, nombre...)
+async function actualizarBuild(req, res) {
+  try {
+    const usuarioId = req.usuario.id;
+    const id = Number(req.params.id);
+    const { nombre, uso, presupuesto, modo, componentes } = req.body || {};
+
+    const existente = await prisma.builds.findUnique({ where: { id } });
+    if (!existente || String(existente.usuario_id) !== String(usuarioId))
+      return res.status(404).json({ error: 'Configuracion no encontrada' });
+
+    const USOS = ['juegos', 'diseno', 'ofimatica'];
+    const usoValido = USOS.includes(uso) ? uso : null;
+    let modoValido = null;
+    if (modo === 'simple' || modo === 'auto') modoValido = 'simple';
+    else if (modo === 'detallado' || modo === 'avanzado' || modo === 'manual') modoValido = 'detallado';
+
+    const ids = TIPOS.map((t) => componentes?.[t]).filter(Boolean).map(Number);
+    const comps = await prisma.componentes.findMany({
+      where: { id: { in: ids } },
+      include: { ofertas: { orderBy: { precio: 'asc' }, take: 1 } },
+    });
+    const precioPorId = {};
+    comps.forEach((c) => { precioPorId[c.id] = c.ofertas[0] ? Number(c.ofertas[0].precio) : null; });
+
+    await prisma.$transaction([
+      prisma.build_componentes.deleteMany({ where: { build_id: id } }),
+      prisma.builds.update({
+        where: { id },
+        data: {
+          ...(nombre !== undefined ? { nombre } : {}),
+          uso: usoValido,
+          presupuesto_objetivo: presupuesto ? Number(presupuesto) : null,
+          modo: modoValido,
+          build_componentes: {
+            create: ids.map((cid) => ({ componente_id: cid, precio_en_creacion: precioPorId[cid] })),
+          },
+        },
+      }),
+    ]);
+
+    res.json({ mensaje: 'Configuracion actualizada', id });
+  } catch (err) {
+    console.error('Error actualizarBuild:', err);
+    res.status(500).json({ error: 'Error al actualizar la configuracion' });
+  }
+}
+
+module.exports = { guardarBuild, misBuild, borrarBuild, actualizarBuild };

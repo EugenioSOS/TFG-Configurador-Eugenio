@@ -3,15 +3,17 @@ import {
   Box, Typography, ToggleButton, ToggleButtonGroup, TextField,
   Button, Stepper, Step, StepLabel, Alert,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import BarraSuperior from './barrasuperior';
 
 const PASOS = ['Uso del PC', 'Presupuesto', 'Nivel'];
 
 const QuestionForm = () => {
-  const [paso, setPaso] = useState(0);
-  const [uso, setUso] = useState('');
-  const [presupuesto, setPresupuesto] = useState('');
+  const location = useLocation();
+  const [paso, setPaso] = useState(location.state?.paso || 0);
+  const [uso, setUso] = useState(localStorage.getItem('uso') || '');
+  const [presupuesto, setPresupuesto] = useState(localStorage.getItem('presupuesto') || '');
+  const [preferencias, setPreferencias] = useState(localStorage.getItem('preferencias') || '');
   const [nivel, setNivel] = useState('');   // 'auto' (simple) | 'manual' (avanzado)
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -21,7 +23,9 @@ const QuestionForm = () => {
     if (paso === 0 && !uso) return setError('Elige para qué usarás el PC.');
     if (paso === 1) {
       const p = Number(presupuesto);
-      if (!p || p < 200) return setError('Introduce un presupuesto válido (mínimo 200 €).');
+      const minimo = uso === 'ofimatica' ? 500 : 800;
+      if (!p) return setError('Introduce un presupuesto válido.');
+      if (p < minimo) return setError(`Para ${uso === 'ofimatica' ? 'ofimática' : 'este uso'} el presupuesto mínimo es ${minimo} €.`);
     }
     if (paso === 2 && !nivel) return setError('Indica si quieres elegir tú los componentes.');
     if (paso < 2) { setPaso(paso + 1); return; }
@@ -34,6 +38,7 @@ const QuestionForm = () => {
     // Guardamos uso y presupuesto para las siguientes pantallas.
     localStorage.setItem('uso', uso);
     localStorage.setItem('presupuesto', presupuesto);
+    localStorage.setItem('preferencias', preferencias);
     // Bifurcacion: manual -> configurador avanzado ; auto -> configurador simple
     if (nivel === 'manual') navigate('/configurador-avanzado', { state: { uso, presupuesto } });
     else navigate('/configurador-simple', { state: { uso, presupuesto } });
@@ -53,9 +58,9 @@ const QuestionForm = () => {
         <Box sx={{ textAlign: 'center' }}>
           <Typography variant="h6" sx={{ mb: 2 }}>¿Para qué vas a usar el PC?</Typography>
           <ToggleButtonGroup exclusive value={uso} onChange={(e, v) => v && setUso(v)} orientation="vertical" sx={{ width: '100%' }}>
-            <ToggleButton value="juegos">🎮 Juegos</ToggleButton>
-            <ToggleButton value="diseno">🎨 Diseño / Render</ToggleButton>
-            <ToggleButton value="ofimatica">📄 Ofimática</ToggleButton>
+            <ToggleButton value="juegos">Juegos</ToggleButton>
+            <ToggleButton value="diseno">Diseño / Render</ToggleButton>
+            <ToggleButton value="ofimatica">Ofimática</ToggleButton>
           </ToggleButtonGroup>
         </Box>
       )}
@@ -67,6 +72,14 @@ const QuestionForm = () => {
             type="number" label="Presupuesto (€)" value={presupuesto}
             onChange={(e) => setPresupuesto(e.target.value)} fullWidth
             InputProps={{ inputProps: { min: 200, step: 50 } }}
+          />
+          <TextField
+            label="Preferencias (opcional)"
+            placeholder="Ej: quiero Intel y 32GB de RAM, sin RGB"
+            value={preferencias}
+            onChange={(e) => setPreferencias(e.target.value)}
+            fullWidth multiline minRows={2} sx={{ mt: 2 }}
+            helperText="Puedes pedir marca de CPU/GPU, RAM mínima, formato compacto, etc."
           />
         </Box>
       )}

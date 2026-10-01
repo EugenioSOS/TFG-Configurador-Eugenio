@@ -6,8 +6,10 @@ import {
 } from '@mui/material';
 import BarraSuperior from './barrasuperior';
 import api from './api';
+import { useNavigate } from 'react-router-dom';
 
 const MisPresupuestos = () => {
+  const navigate = useNavigate();
   const [builds, setBuilds] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
@@ -25,6 +27,15 @@ const MisPresupuestos = () => {
   };
 
   useEffect(() => { cargar(); }, []);
+
+  const editar = (b) => {
+    const componentes = {};
+    b.piezas.forEach((p) => { if (p.tipo && p.id) componentes[p.tipo] = p.id; });
+    localStorage.setItem('editarBuild', JSON.stringify({ componentes, buildId: b.id }));
+    if (b.uso) localStorage.setItem('uso', b.uso);
+    if (b.presupuesto) localStorage.setItem('presupuesto', b.presupuesto);
+    navigate('/configurador-avanzado');
+  };
 
   const borrar = async (id) => {
     if (!window.confirm('¿Borrar esta configuración?')) return;
@@ -60,7 +71,7 @@ const MisPresupuestos = () => {
                       {b.uso ? `Uso: ${b.uso} · ` : ''}{new Date(b.creado_en).toLocaleDateString('es-ES')}
                     </Typography>
                   </Box>
-                  <Button color="error" size="small" onClick={() => borrar(b.id)}>Borrar</Button>
+                  <Box><Button size="small" onClick={() => editar(b)} sx={{ mr: 1 }}>Editar</Button><Button color="error" size="small" onClick={() => borrar(b.id)}>Borrar</Button></Box>
                 </Box>
 
                 <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
