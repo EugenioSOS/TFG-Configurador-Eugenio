@@ -15,6 +15,7 @@ const Register = () => {
   const handleRegister = async () => {
     setError('');
     if (!username || !email || !password) { setError('Rellena todos los campos'); return; }
+    if (!/^\S+@\S+\.\S+$/.test(email)) { setError('El email no es válido'); return; }
     if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres'); return; }
     setCargando(true);
     try {

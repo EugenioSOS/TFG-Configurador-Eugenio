@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-  Box, Typography, FormControl, InputLabel, Select, MenuItem, Grid,
-  Button, Alert, Divider, CircularProgress, Chip,
+  Box, Typography, Grid, Button, Alert, Divider, CircularProgress, Chip,
+  Autocomplete, TextField,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import api from './api';
@@ -100,6 +100,9 @@ const ConfiguradorAvanzado = () => {
   // precio de una oferta (la mas barata)
   const precioDe = (comp) => (comp.ofertas && comp.ofertas[0] ? comp.ofertas[0].precio : null);
 
+  // texto que se muestra (y por el que se filtra) en cada opcion: nombre y precio
+  const etiquetaDe = (c) => `${c.nombre || ''}${precioDe(c) != null ? ` — ${precioDe(c)} €` : ''}`;
+
   if (cargando) return (
     <Box sx={{ textAlign: 'center', mt: 8 }}>
       <CircularProgress /><Typography sx={{ mt: 2 }}>Cargando componentes…</Typography>
@@ -132,23 +135,27 @@ const ConfiguradorAvanzado = () => {
           // Con conflicto, se bloquean los desplegables de piezas AUN no elegidas
           // (los ya elegidos quedan activos para poder resolver el conflicto).
           const bloqueado = hayConflicto && !yaElegido;
+          // Desplegable con filtro por nombre: se escribe y se reduce la lista.
+          const lista = opciones[tipo] || [];
+          const valor = lista.find((c) => Number(c.id) === Number(seleccion[tipo])) || null;
           return (
           <Grid item xs={12} sm={6} key={tipo}>
-            <FormControl fullWidth disabled={bloqueado}>
-              <InputLabel>{etiqueta}</InputLabel>
-              <Select
-                label={etiqueta}
-                value={seleccion[tipo] != null ? Number(seleccion[tipo]) : ''}
-                onChange={(e) => cambiar(tipo, e.target.value)}
-              >
-                <MenuItem value=""><em>— sin elegir —</em></MenuItem>
-                {(opciones[tipo] || []).map((c) => (
-                  <MenuItem key={c.id} value={Number(c.id)}>
-                    {c.nombre} {precioDe(c) != null ? `— ${precioDe(c)} €` : ''}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              fullWidth
+              disabled={bloqueado}
+              options={lista}
+              value={valor}
+              getOptionLabel={etiquetaDe}
+              isOptionEqualToValue={(o, v) => Number(o.id) === Number(v.id)}
+              onChange={(e, val) => cambiar(tipo, val ? Number(val.id) : '')}
+              renderOption={(props, c) => (
+                <li {...props} key={c.id}>{etiquetaDe(c)}</li>
+              )}
+              noOptionsText="Sin resultados"
+              renderInput={(params) => (
+                <TextField {...params} label={etiqueta} placeholder="Escribe para filtrar…" />
+              )}
+            />
           </Grid>
           );
         })}

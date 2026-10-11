@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+     "scripts": {
+     "start": "node server.js",
+     "test": "jest --verbose"
+   },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -22,6 +23,7 @@
     "playwright": "^1.63.0"
   },
   "devDependencies": {
+    "jest": "^30.5.2",
     "prisma": "^6.19.3"
   }
 }

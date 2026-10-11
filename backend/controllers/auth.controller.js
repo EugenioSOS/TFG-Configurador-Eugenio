@@ -10,6 +10,8 @@ async function registrar(req, res) {
     const { username, email, password } = req.body || {};
     if (!username || !email || !password)
       return res.status(400).json({ error: 'Faltan datos (username, email, password)' });
+    if (!/^\S+@\S+\.\S+$/.test(email)){
+      return res.status(400).json({ error: 'El email no es válido' });}
     if (password.length < 6)
       return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
 
