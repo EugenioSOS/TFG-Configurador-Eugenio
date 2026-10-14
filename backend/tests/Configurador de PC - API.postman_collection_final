@@ -1,0 +1,787 @@
+{
+  "info": {
+    "_postman_id": "731fe27f-24ea-45bd-8553-e2f68255bcf6",
+    "name": "Configurador de PC - API",
+    "description": "Colección de pruebas de la API del configurador de PC (TFG). Rutas reales: /api/login y /api/register (sin /auth). El registro crea un usuario único en cada ejecución, el login entra con ese usuario y guarda el token. Variables: baseUrl, token, buildId, componenteId, regUser, regEmail, regPass. Ejecutar en orden (Collection Runner) o de arriba a abajo.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "438736"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Registro",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Usuario único por ejecución (eugenio + marca de tiempo) para que el registro no choque.",
+                  "var n = 'eugenio_' + Date.now();",
+                  "pm.collectionVariables.set('regUser', n);",
+                  "pm.collectionVariables.set('regEmail', n + '@correo.com');",
+                  "pm.collectionVariables.set('regPass', 'test1234');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Registro correcto (200 o 201)', function () {",
+                  "  pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Respuesta en JSON', function () {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{regUser}}\",\n  \"email\": \"{{regEmail}}\",\n  \"password\": \"{{regPass}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "register"
+              ]
+            },
+            "description": "Registra un usuario nuevo (RF-01 / CU-01). El usuario es único en cada ejecución."
+          },
+          "response": []
+        },
+        {
+          "name": "Registro - usuario duplicado (error esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('No permite duplicados (400 o 409)', function () {",
+                  "  pm.expect([400, 409]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{regUser}}\",\n  \"email\": \"{{regEmail}}\",\n  \"password\": \"{{regPass}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "register"
+              ]
+            },
+            "description": "Reenvía el mismo registro: debe rechazarse por usuario/email ya existente (validación de RF-01)."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login responde correctamente (200)', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "var d = pm.response.json();",
+                  "pm.test('Devuelve un token', function () {",
+                  "  pm.expect(d.token, 'no hay token en la respuesta').to.be.a('string');",
+                  "});",
+                  "if (d && d.token) { pm.collectionVariables.set('token', d.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{regUser}}\",\n  \"password\": \"{{regPass}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Inicia sesión con el usuario recién creado y guarda el token (RF-02 / CU-02)."
+          },
+          "response": []
+        },
+        {
+          "name": "Login - credenciales incorrectas (error esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Rechaza credenciales inválidas (400/401/403)', function () {",
+                  "  pm.expect([400, 401, 403]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{regUser}}\",\n  \"password\": \"claveIncorrecta\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Contraseña incorrecta: debe devolver error de credenciales (RNF-01)."
+          },
+          "response": []
+        },
+        {
+          "name": "Registro-Valicación email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "   pm.test(\"Devuelve 400\", () => pm.response.to.have.status(400));\r",
+                  "   pm.test(\"Mensaje de email inválido\", () => {\r",
+                  "     pm.expect(pm.response.json().error).to.include(\"email\");\r",
+                  "   });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{regUser}}\",\n  \"email\": \"aaaaaa\",\n  \"password\": \"{{regPass}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "register"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Componentes",
+      "item": [
+        {
+          "name": "Listar componentes (paginado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', function () { pm.response.to.have.status(200); });",
+                  "var data = pm.response.json();",
+                  "pm.test('Trae campo datos (array)', function () {",
+                  "  pm.expect(data).to.have.property('datos');",
+                  "  pm.expect(data.datos).to.be.an('array');",
+                  "});",
+                  "pm.test('Incluye metadatos de paginación', function () {",
+                  "  pm.expect(data).to.have.property('total');",
+                  "  pm.expect(data).to.have.property('totalPaginas');",
+                  "});",
+                  "if (data.datos && data.datos.length > 0) {",
+                  "  pm.collectionVariables.set('componenteId', data.datos[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/componentes?pagina=1&porPagina=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "componentes"
+              ],
+              "query": [
+                {
+                  "key": "pagina",
+                  "value": "1"
+                },
+                {
+                  "key": "porPagina",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Lista el catálogo paginado y guarda el id del primer componente."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar componentes por tipo (cpu)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', function () { pm.response.to.have.status(200); });",
+                  "var data = pm.response.json();",
+                  "pm.test('Todos los resultados son del tipo pedido', function () {",
+                  "  (data.datos || []).forEach(function (c) { pm.expect(c.tipo).to.eql('cpu'); });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/componentes?tipo=cpu&pagina=1&porPagina=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "componentes"
+              ],
+              "query": [
+                {
+                  "key": "tipo",
+                  "value": "cpu"
+                },
+                {
+                  "key": "pagina",
+                  "value": "1"
+                },
+                {
+                  "key": "porPagina",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Filtra el catálogo por tipo y comprueba que solo devuelve CPUs."
+          },
+          "response": []
+        },
+        {
+          "name": "Detalle de un componente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', function () { pm.response.to.have.status(200); });",
+                  "var data = pm.response.json();",
+                  "pm.test('El id coincide con el solicitado', function () {",
+                  "  pm.expect(String(data.id)).to.eql(String(pm.collectionVariables.get('componenteId')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/componentes/{{componenteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "componentes",
+                "{{componenteId}}"
+              ]
+            },
+            "description": "Devuelve un componente con su especificación de tipo y sus ofertas."
+          },
+          "response": []
+        },
+        {
+          "name": "Recuento por tipo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Devuelve un array', function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tipos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tipos"
+              ]
+            },
+            "description": "Devuelve el número de componentes por tipo."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Builds",
+      "item": [
+        {
+          "name": "Generar build automática",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Devuelve una o más builds', function () {",
+                  "  pm.expect(pm.response.json()).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uso\": \"juegos\",\n  \"presupuesto\": 3000,\n  \"preferencias\": \"GPU Nvidia\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/builds/generar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "builds",
+                "generar"
+              ]
+            },
+            "description": "Genera builds por gamas a partir de uso, presupuesto y preferencias (RF-07 / CU-04). Verifica la ruta real de /builds en tu backend."
+          },
+          "response": []
+        },
+        {
+          "name": "Generar - presupuesto por debajo del mínimo (error esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Rechaza presupuesto insuficiente (4xx)', function () {",
+                  "  pm.expect(pm.response.code).to.be.within(400, 499);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uso\": \"ofimatica\",\n  \"presupuesto\": 300,\n  \"preferencias\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/builds/generar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "builds",
+                "generar"
+              ]
+            },
+            "description": "Presupuesto por debajo del mínimo (500 ofimática / 800 resto): debe rechazarse (RF-05)."
+          },
+          "response": []
+        },
+        {
+          "name": "Validar compatibilidad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', function () { pm.response.to.have.status(200); });",
+                  "var d = pm.response.json();",
+                  "pm.test('Devuelve estructura de validación', function () {",
+                  "  pm.expect(d).to.satisfy(function (x) { return x.errores !== undefined || x.avisos !== undefined || x.ok !== undefined; });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uso\": \"juegos\",\n  \"componentes\": [1, 2, 3, 4, 5, 6, 7, 8]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/builds/validar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "builds",
+                "validar"
+              ]
+            },
+            "description": "Valida una selección de componentes (RF-11 / CU-06). AJUSTA los ids a componentes reales de tu BD y la ruta/campos a tu controlador."
+          },
+          "response": []
+        },
+        {
+          "name": "Guardar presupuesto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200 o 201', function () { pm.expect([200,201]).to.include(pm.response.code); });",
+                  "var d = pm.response.json();",
+                  "if (d && (d.id || (d.build && d.build.id))) {",
+                  "  pm.collectionVariables.set('buildId', String(d.id || d.build.id));",
+                  "}",
+                  "pm.test('Devuelve el presupuesto guardado', function () {",
+                  "  pm.expect(d).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Build de prueba\",\n  \"uso\": \"juegos\",\n  \"modo\": \"simple\",\n  \"presupuesto_objetivo\": 3000,\n  \"componentes\": [1, 2, 3, 4, 5, 6, 7, 8]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/builds/guardar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "builds",
+                "guardar"
+              ]
+            },
+            "description": "Guarda un presupuesto del usuario autenticado y guarda su id (RF-15 / CU-08). AJUSTA los ids y campos."
+          },
+          "response": []
+        },
+        {
+          "name": "Guardar sin token (error esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Rechaza sin token (401)', function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Sin token\",\n  \"uso\": \"juegos\",\n  \"componentes\": [1, 2, 3]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/builds/guardar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "builds",
+                "guardar"
+              ]
+            },
+            "description": "Intenta guardar sin token: debe devolver 401 (control de acceso, RNF-02)."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar mis presupuestos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Devuelve un array', function () {",
+                  "  var d = pm.response.json();",
+                  "  pm.expect(Array.isArray(d) || Array.isArray(d.datos)).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/builds/mis-builds",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "builds",
+                "mis-builds"
+              ]
+            },
+            "description": "Lista los presupuestos del usuario autenticado (RF-16 / CU-09)."
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar presupuesto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Build de prueba (editada)\",\n  \"uso\": \"juegos\",\n  \"modo\": \"detallado\",\n  \"presupuesto_objetivo\": 3200,\n  \"componentes\": [1, 2, 3, 4, 5, 6, 7, 8]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/builds/{{buildId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "builds",
+                "{{buildId}}"
+              ]
+            },
+            "description": "Actualiza un presupuesto existente del usuario (RF-17 / CU-10)."
+          },
+          "response": []
+        },
+        {
+          "name": "Borrar presupuesto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200 o 204', function () { pm.expect([200,204]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/builds/{{buildId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "builds",
+                "{{buildId}}"
+              ]
+            },
+            "description": "Borra el presupuesto creado antes (RF-18 / CU-11)."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "buildId",
+      "value": ""
+    },
+    {
+      "key": "componenteId",
+      "value": ""
+    },
+    {
+      "key": "regUser",
+      "value": ""
+    },
+    {
+      "key": "regEmail",
+      "value": ""
+    },
+    {
+      "key": "regPass",
+      "value": "test1234"
+    }
+  ]
+}
