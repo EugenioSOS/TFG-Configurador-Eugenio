@@ -1,3 +1,4 @@
+// Uso (desde backend/): node herramientas/actualizar_placas.js herramientas/placas_base_ram_formato.csv
 
 
 const fs = require('fs');
@@ -42,7 +43,7 @@ function normSocket(v) {
 }
 
 async function main() {
-  const ruta = process.argv[2] || 'placas.csv';
+  const ruta = process.argv[2] || require('path').join(__dirname, 'placas_base_ram_formato.csv');
   if (!fs.existsSync(ruta)) { console.error('No existe el fichero:', ruta); process.exit(1); }
 
   const filas = parseCSV(fs.readFileSync(ruta, 'utf8'));

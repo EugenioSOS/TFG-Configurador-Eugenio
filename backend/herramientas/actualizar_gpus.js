@@ -2,7 +2,7 @@
 // El CSV casa por NOMBRE con la tabla componentes (tipo='gpu') para obtener el id.
 //
 // CSV esperado (cabecera):  gpu,longitud_mm,watts_recomendados
-// Uso:  node actualizar_gpus.js gpus_longitud_watts_recomendados_3_columnas.csv
+// Uso (desde backend/): node herramientas/actualizar_gpus.js herramientas/gpus_longitud_watts_recomendados_3_columnas.csv
 
 const fs = require('fs');
 const { PrismaClient } = require('@prisma/client');
@@ -35,7 +35,7 @@ function norm(s) {
 }
 
 async function main() {
-  const ruta = process.argv[2] || 'gpus_longitud_watts_recomendados_3_columnas.csv';
+  const ruta = process.argv[2] || require('path').join(__dirname, 'gpus_longitud_watts_recomendados_3_columnas.csv');
   if (!fs.existsSync(ruta)) { console.error('No existe el fichero:', ruta); process.exit(1); }
 
   const filas = parseCSV(fs.readFileSync(ruta, 'utf8'));

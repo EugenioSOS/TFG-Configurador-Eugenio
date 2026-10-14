@@ -1,5 +1,5 @@
 // Diagnostico: que specs lee Playwright de UNA ficha.
-// Uso:  node diag.js "URL_DE_UNA_FICHA_DE_CPU"
+// Uso (desde backend/): node herramientas/diag.js "URL_DE_UNA_FICHA_DE_CPU"
 
 const { chromium } = require('playwright');
 

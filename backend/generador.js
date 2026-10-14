@@ -1,7 +1,7 @@
 
 
 const prisma = require('./db');
-const { analizarBuild } = require('./compatibilidad');
+const { analizarBuild, gamaGpu } = require('./compatibilidad');
 const { aplanar, INCLUDE_COMPLETO } = require('./aplanar_datos');
 const { cumpleFiltros } = require('./preferencias');
 
@@ -39,7 +39,25 @@ function armarBuild(cat, uso, presupuesto, factorGama, filtros = {}) {
   const rep = REPARTO[uso] || REPARTO.juegos;
   const tope = (pieza) => presupuesto * (rep[pieza] || 0) * factorGama;
   const socketsConPlaca = new Set(cat.placa.map((p) => norm(p.socket)));
-  const cpu = elegir(cat.cpu, tope('cpu'), (c) => socketsConPlaca.has(norm(c.socket)))|| elegir(cat.cpu, tope('cpu'));  
+  const conPlaca = (c) => socketsConPlaca.has(norm(c.socket));
+  // Idoneidad segun el uso (mismos criterios que los avisos del motor): se aplica
+  // antes de elegir para que la build propuesta no dispare sus propios avisos.
+  const cpuApta = (c) => {
+    if (c.nucleos == null) return true;
+    if (uso === 'juegos') return c.nucleos >= 6;
+    if (uso === 'diseno') return c.nucleos >= 8;
+    if (uso === 'ofimatica') return c.nucleos < 12 && (c.precio || 0) < 400;
+    return true;
+  };
+  const gpuApta = (g) => {
+    const gama = gamaGpu(g);
+    if (uso === 'juegos') return gama !== 'profesional';
+    if (uso === 'diseno') return gama !== 'entrada';
+    return true;
+  };
+  const cpu = elegir(cat.cpu, tope('cpu'), (c) => conPlaca(c) && cpuApta(c))
+    || elegir(cat.cpu, tope('cpu'), conPlaca)
+    || elegir(cat.cpu, tope('cpu'));
   const placa = elegir(cat.placa, tope('placa'), (p) => !cpu || norm(p.socket) === norm(cpu.socket));
   const ddrRam = (r) => r.tipo_spec || r.tipo;   // respaldo por compatibilidad
   const casaRam = (r) => !placa || !placa.tipo_ram || !ddrRam(r) || placa.tipo_ram.toUpperCase() === ddrRam(r).toUpperCase();
@@ -47,7 +65,7 @@ function armarBuild(cat, uso, presupuesto, factorGama, filtros = {}) {
   const necesitaGpu = rep.gpu > 0 || (cpu && cpu.grafica_integrada === false);
   const gpuConWatts = cat.gpu.filter((g) => g.watts_recomendados != null);
   const catGpu = gpuConWatts.length > 0 ? gpuConWatts : cat.gpu;   
-  const gpu = necesitaGpu ? elegir(catGpu, tope('gpu')) : null;
+  const gpu = necesitaGpu ? (elegir(catGpu, tope('gpu'), gpuApta) || elegir(catGpu, tope('gpu'))) : null;
   const almacenamiento = elegir(cat.almacenamiento, tope('almacenamiento'));
   const caja = elegir(cat.caja, tope('caja'),
     (c) => !placa || !placa.formato || (c.formatos_admitidos || []).includes(placa.formato));

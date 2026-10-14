@@ -1,5 +1,5 @@
 // Ver como aparecen slots y capacidad max en UNA placa.
-// Uso: node diag_placas.js "URL_DE_UNA_PLACA"
+// Uso (desde backend/): node herramientas/diag_placas.js "URL_DE_UNA_PLACA"
 const { chromium } = require('playwright');
 async function main() {
   const url = process.argv[2];

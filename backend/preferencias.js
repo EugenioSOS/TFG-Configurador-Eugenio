@@ -19,18 +19,34 @@ function parsePreferencias(texto) {
     else { filtros.marcaCpu = 'intel'; entendido.push('CPU: Intel'); }
   }
   
-  if (presente(/\b(amd|ryzen)\b/) && !/radeon|grafica|gpu/.test(t)) {
+  // Cada aparicion de "amd" se clasifica como CPU o GPU segun la palabra que la
+  // acompana: "gpu amd" / "amd radeon" -> GPU; "cpu amd" / "amd ryzen" -> CPU;
+  // sin contexto -> CPU. Asi "gpu amd cpu intel" no se lee como CPU AMD.
+  const PAL_GPU = /^(gpu|grafica|graficas|tarjeta|tarjetas|radeon|rx)$/;
+  const PAL_CPU = /^(cpu|procesador|procesadores|ryzen)$/;
+  let amdCpu = false, amdGpu = false;
+  const palabras = t.trim().split(' ');
+  palabras.forEach((w, i) => {
+    if (w !== 'amd') return;
+    const antes = palabras.slice(Math.max(0, i - 2), i);
+    const despues = palabras[i + 1] || '';
+    if (antes.some((x) => PAL_GPU.test(x))) amdGpu = true;
+    else if (antes.some((x) => PAL_CPU.test(x))) amdCpu = true;
+    else if (PAL_GPU.test(despues)) amdGpu = true;
+    else amdCpu = true;
+  });
+  if (presente(/\bryzen\b/) || amdCpu) {
     if (negada('amd') || negada('ryzen')) { filtros.marcaCpuExcluir = 'amd'; entendido.push('CPU: evitar AMD'); }
     else { filtros.marcaCpu = 'amd'; entendido.push('CPU: AMD'); }
   }
 
   // --- Marca de GPU ---
-  if (presente(/\bnvidia\b|\bgeforce\b|\brtx\b/)) {
-    if (negada('nvidia') || negada('geforce') || negada('rtx')) { filtros.marcaGpuExcluir = 'nvidia'; entendido.push('GPU: evitar Nvidia'); }
+  if (presente(/\bnvidia\b|\bgeforce\b|\brtx\b|\bgtx\b/)) {
+    if (negada('nvidia') || negada('geforce') || negada('rtx') || negada('gtx')) { filtros.marcaGpuExcluir = 'nvidia'; entendido.push('GPU: evitar Nvidia'); }
     else { filtros.marcaGpu = 'nvidia'; entendido.push('GPU: Nvidia'); }
   }
-  if (presente(/\bradeon\b/)) {
-    if (negada('radeon')) { filtros.marcaGpuExcluir = 'amd'; entendido.push('GPU: evitar Radeon'); }
+  if (presente(/\bradeon\b/) || amdGpu) {
+    if (negada('radeon') || negada('amd')) { filtros.marcaGpuExcluir = 'amd'; entendido.push('GPU: evitar AMD/Radeon'); }
     else { filtros.marcaGpu = 'amd'; entendido.push('GPU: AMD/Radeon'); }
   }
 
