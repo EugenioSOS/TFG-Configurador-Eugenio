@@ -1,4 +1,3 @@
-// fichas_ram.js
 // Rellena la tabla ram a partir del NOMBRE del componente (que ya contiene todo).
 // No hace falta navegador: los datos de RAM estan en el propio nombre.
 // Campos: tipo (DDR4/DDR5), capacidad_gb, modulos, frecuencia_mhz.

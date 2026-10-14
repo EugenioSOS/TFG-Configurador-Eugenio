@@ -27,9 +27,8 @@ const ConfiguradorAvanzado = () => {
   const presupuesto = localStorage.getItem('presupuesto') || null;
 
   // Carga TODO en un solo efecto y en orden: lee la build a editar, carga las
-  // opciones, trae las piezas elegidas que no esten entre las primeras 100, y fija
-  // la seleccion. (Antes habia dos efectos y uno borraba 'editarBuild' antes de que
-  // el otro lo usara, por eso se perdian componentes.)
+  // opciones, trae las piezas elegidas que no esten entre las primeras 100 y fija
+  // la seleccion.
   useEffect(() => {
     (async () => {
       try {

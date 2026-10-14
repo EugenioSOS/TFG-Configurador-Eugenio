@@ -1,6 +1,6 @@
 
 
-// Mapa tipo -> nombre de la relacion 1-a-1 en Prisma (ajustar si tu schema difiere).
+// Mapa tipo -> nombre de la relacion 1-a-1 en Prisma.
 const RELACION_TIPO = {
   cpu: 'cpus', gpu: 'gpus', placa: 'placas', ram: 'ram',
   almacenamiento: 'almacenamiento', fuente: 'fuentes',

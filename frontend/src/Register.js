@@ -21,7 +21,7 @@ const Register = () => {
     try {
       await api.post('/register', { username, email, password });
       setOk(true);
-      setTimeout(() => navigate('/'), 1200); // vuelve al login
+      setTimeout(() => navigate('/'), 1200);
     } catch (err) {
       setError(err.response?.data?.error || 'Error al registrar');
     } finally {

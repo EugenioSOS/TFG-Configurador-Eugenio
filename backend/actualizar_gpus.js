@@ -1,9 +1,8 @@
-// actualizar_gpus_csv.js
 // Actualiza longitud_mm y watts_recomendados de las GPUs a partir de un CSV.
 // El CSV casa por NOMBRE con la tabla componentes (tipo='gpu') para obtener el id.
 //
 // CSV esperado (cabecera):  gpu,longitud_mm,watts_recomendados
-// Uso:  node actualizar_gpus_csv.js gpus_longitud_watts_recomendados_3_columnas.csv
+// Uso:  node actualizar_gpus.js gpus_longitud_watts_recomendados_3_columnas.csv
 
 const fs = require('fs');
 const { PrismaClient } = require('@prisma/client');

@@ -1,4 +1,3 @@
-// fichas_refrigeracion.js
 // Rellena la tabla refrigeracion desde los campos rapidos de la ficha de Coolmod.
 // Campos: clase (Aire/Liquida), altura_mm (solo aire), socket_compat (lista),
 //         tdp_max_watts (si aparece).

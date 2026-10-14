@@ -1,5 +1,4 @@
 // Pruebas unitarias del motor de compatibilidad (compatibilidad.js).
-// Ajustar la ruta del require si el fichero esta en otra carpeta.
 const { analizarBuild, gamaGpu } = require('../compatibilidad');
 
 // ---------- fixtures: una build base completamente compatible ----------

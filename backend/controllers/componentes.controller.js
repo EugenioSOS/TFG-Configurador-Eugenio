@@ -49,7 +49,7 @@ async function obtenerComponente(req, res) {
       where: { id },
       include: {
         ofertas: { include: { tiendas: true }, orderBy: { precio: 'asc' } },
-        // Relaciones 1-a-1 con las tablas de tipo (Prisma las nombra segun tu schema):
+        // Relaciones 1-a-1 con las tablas de tipo:
         cpus: true, gpus: true, placas: true, ram: true,
         almacenamiento: true, fuentes: true, refrigeracion: true, cajas: true,
       },

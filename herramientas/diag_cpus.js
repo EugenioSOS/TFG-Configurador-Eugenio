@@ -1,5 +1,5 @@
-// diag_cpu2.js — Ver los campos RAPIDOS (font-bold + span) de una CPU.
-// Uso: node diag_cpu2.js "URL"
+// Ver los campos RAPIDOS (font-bold + span) de una CPU.
+// Uso: node diag_cpus.js "URL"
 const { chromium } = require('playwright');
 async function main() {
   const url = process.argv[2];

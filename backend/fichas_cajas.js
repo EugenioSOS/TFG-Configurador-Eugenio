@@ -1,4 +1,3 @@
-// fichas_cajas.js
 // Rellena la tabla cajas desde la ficha de Coolmod.
 // Campos: formatos_admitidos (ATX...), long_max_gpu_mm, altura_max_disip_mm.
 // Las cajas usan <li>Clave: valor</li> SIN <strong>, y la longitud de GPU suele

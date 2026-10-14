@@ -1,8 +1,7 @@
-// fichas_fuentes.js
 // Rellena la tabla fuentes desde la ficha de Coolmod (campos rapidos) + nombre.
 // Campos: watts (clave para compatibilidad), certificacion, modular.
 //
-// Uso:  node fichas_fuentes.js
+// Uso:  node ficha_fuentes.js
 
 const { chromium } = require('playwright');
 const { PrismaClient } = require('@prisma/client');

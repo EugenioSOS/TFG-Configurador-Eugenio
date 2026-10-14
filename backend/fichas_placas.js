@@ -1,4 +1,3 @@
-// fichas_placas.js
 // Rellena la tabla placas desde los campos rapidos de la ficha de Coolmod.
 // Campos: socket, tipo_ram (DDR4/DDR5), formato (ATX/Micro-ATX/Mini-ITX), chipset.
 // Los datos estan en los bloques <div class="font-bold">Etiqueta</div> <span title="valor">.

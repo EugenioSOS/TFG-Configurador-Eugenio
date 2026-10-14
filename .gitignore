@@ -1,0 +1,23 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno y secretos
+.env
+.env.*
+!.env.example
+
+# Prisma
+backend/generated/
+
+# Build del frontend
+frontend/build/
+
+# Pruebas
+coverage/
+
+# Editor y sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

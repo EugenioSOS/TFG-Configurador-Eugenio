@@ -1,4 +1,3 @@
-// middleware/auth.js
 // Verifica el token JWT del header Authorization: Bearer <token>.
 // Protege endpoints: si el token es valido, deja pasar; si no, 401.
 const jwt = require('jsonwebtoken');

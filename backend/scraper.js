@@ -7,7 +7,6 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // ============================================================
 //  MAPEO DE CATEGORIAS -> TIPO
 //  Rellena cada 'slug' con la parte final de la URL en Coolmod.
-//  (procesadores esta confirmado; el resto AJUSTALOS con las URLs reales)
 //  Si una categoria tiene VARIAS URLs (p.ej. SSD y HDD -> almacenamiento),
 //  añade varias entradas con el mismo 'tipo'.
 // ============================================================

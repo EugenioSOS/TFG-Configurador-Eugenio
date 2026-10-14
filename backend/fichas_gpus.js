@@ -1,9 +1,8 @@
-// fichas_gpu.js
 // Rellena la tabla gpus desde la ficha de Coolmod + el nombre.
 // Campos: longitud_mm (1er num de "Tamaño de la Tarjeta"), watts_recomendados
 //         ("PSU Recomendado"), vram_gb (del nombre). tdp_watts se deja si ya existe.
 //
-// Uso:  node fichas_gpu.js
+// Uso:  node fichas_gpus.js
 
 const { chromium } = require('playwright');
 const { PrismaClient } = require('@prisma/client');

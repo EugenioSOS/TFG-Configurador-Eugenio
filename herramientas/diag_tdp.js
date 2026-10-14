@@ -1,4 +1,4 @@
-// diag_tdp.js — Localiza DONDE esta el TDP en una ficha de CPU.
+// Localiza DONDE esta el TDP en una ficha de CPU.
 // Uso: node diag_tdp.js "URL_DE_UNA_CPU"
 const { chromium } = require('playwright');
 async function main() {

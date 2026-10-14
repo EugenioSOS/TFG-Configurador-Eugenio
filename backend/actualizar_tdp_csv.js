@@ -1,4 +1,3 @@
-// actualizar_tdp_csv.js
 // Rellena el TDP (tdp_watts) de las CPU desde el CSV (cpus_tdp.csv).
 // Casa por id. Salta las filas con tdp vacio (REVISAR) o fuera de rango.
 //
